@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Countdown Timer</title>
+  <style>
+    html {
+      background: url(https://cdn.pixabay.com/photo/2019/12/17/17/58/night-4702174_960_720.jpg) no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      color: white;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 20px;  /* add some space at the bottom of the page */
+    }
+    .countdown {
+      font-size: 11vw;
+      white-space: nowrap;
+      position: absolute;
+      bottom: 45px;
+      text-shadow: 8px 8px 50px black;
+    }
+  </style>
+</head>
+<body>
+  <div class="countdown" id="countdown">
+    ...
+  </div>
+  <script>
+    // Set the date we're counting down to
+    var countDownDate = new Date("Dec 31, 2023 23:59:59").getTime();
+
+    // Update the count down every 1 second
+    var x = setInterval(function() {
+
+      // Get today's date and time
+      var now = new Date().getTime();
+
+      // Find the distance between now and the count down date
+      var distance = countDownDate - now;
+
+      // Time calculations for days, hours, minutes, and seconds
+      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Display the result in the element with id="countdown"
+      var countdownString = "";
+      if (days > 0) {
+        countdownString += days + "d ";
+        countdownString += (hours < 10 ? "0" + hours : hours) + "h ";
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (hours > 0) {
+        countdownString += (hours < 10 ? "0" + hours : hours) + "h ";
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (minutes > 0) {
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (seconds > 0) {
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      }
+
+      document.getElementById("countdown").innerHTML = countdownString;
+
+      // If the count down is finished, write some text
+      if (distance < 0) {
+        clearInterval(x);
+        document.getElementById("countdown").innerHTML = "🎆🚀🚀🎆";
+      }
+
+
+
+
+
+    }, 1000);
+  </script>
+</body>
+</html>
