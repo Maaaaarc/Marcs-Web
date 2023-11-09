@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rectangle Demo</title>
+    <style>
+        body {
+            background: rgb(0, 4, 40);
+            background: linear-gradient(90deg, rgba(0, 4, 40, 1) 0%, rgba(0, 78, 146, 1) 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-top: 5px;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 15px;
+            border: none;
+            box-sizing: border-box;
+            font-size: 16px;
+            width: 150px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: white;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        #rectangle {
+            width: 0;
+            height: 0;
+            background-color: white;
+            transition: width 0.5s, height 0.5s;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .preset-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
+        #fullscreen-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        #note {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+        }
+
+        #toggle-button {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background-color: white;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+</head>
+<body>
+    <label for="screen-width">Screen Width(cm):</label>
+    <input type="number" id="screen-width" min="0" max="1000">
+
+    <label for="screen-height">Screen Height(cm):</label>
+    <input type="number" id="screen-height" min="0" max="1000">
+
+    <label for="demo-width">Target Width(cm):</label>
+    <input type="number" id="demo-width" min="0" max="1000">
+
+    <label for="demo-height">Target Height(cm):</label>
+    <input type="number" id="demo-height" min="0" max="1000">
+
+    <div id="rectangle"></div>
+
+    <div class="preset-buttons">
+        <button onclick="loadPreset(52.7, 29.6)">24"</button>
+        <button onclick="loadPreset(59.7, 33.6)">27"</button>
+        <button onclick="loadPreset(70.9, 39.9)">32"</button>
+    </div>
+
+    <button id="fullscreen-button" onclick="toggleFullScreen()">Full screen</button>
+
+    <div id="note">Note: When the site is not in fullscreen, the dimensions may not be accurate.</div>
+
+    <button id="toggle-button" onclick="toggleUI()">Toggle UI</button>
+
+    <script>
+        function loadPreset(screenWidth, screenHeight) {
+            document.getElementById("screen-width").value = screenWidth;
+            document.getElementById("screen-height").value = screenHeight;
+            updateRectangle();
+        }
+
+        function updateRectangle() {
+            var screenWidth = parseFloat(document.getElementById("screen-width").value);
+            var screenHeight = parseFloat(document.getElementById("screen-height").value);
+            var demoWidth = parseFloat(document.getElementById("demo-width").value);
+            var demoHeight = parseFloat(document.getElementById("demo-height").value);
+
+            var rectangle = document.getElementById("rectangle");
+            rectangle.style.width = (demoWidth / screenWidth) * 100 + "vw";
+            rectangle.style.height = (demoHeight / screenHeight) * 100 + "vh";
+        }
+
+        // Add event listeners to auto-update the rectangle when input values change
+        var inputs = document.getElementsByTagName("input");
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener("input", updateRectangle);
+        }
+
+        // Full screen functionality
+        function toggleFullScreen() {
+            var doc = window.document;
+            var docEl = doc.documentElement;
+
+            var requestFullScreen =
+                docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            var exitFullScreen =
+                doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+            } else {
+                exitFullScreen.call(doc);
+            }
+        }
+
+        // Toggle UI elements
+        function toggleUI() {
+            var elements = document.querySelectorAll("body > *:not(#toggle-button):not(#rectangle)");
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].classList.toggle("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
