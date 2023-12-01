@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="attribution" content="Font by u/toiletgranny from Reddit">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1ERGV7DCN1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1ERGV7DCN1');
+  </script>
+  <title>Countdown Timer</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+  <style>
+
+@font-face {
+    font-family: 'gtavifont';
+    src: url('Font/GTAArtDeco-Regular.eot');
+    src: url('Font/GTAArtDeco-Regular.eot?#iefix') format('embedded-opentype'),
+        url('Font/GTAArtDeco-Regular.woff2') format('woff2'),
+        url('Font/GTAArtDeco-Regular.woff') format('woff'),
+        url('Font/GTAArtDeco-Regular.ttf') format('truetype'),
+        url('Font/GTAArtDeco-Regular.svg#GTAArtDeco-Regular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'gtavifont'; 
+    }
+
+    body {
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: url('gtapic.jpg') no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+    }
+
+    .all {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: left;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .all > div {
+      color: rgb(255, 255, 255);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: left;
+      align-items: center;
+      text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8);
+
+    }
+
+    .all p {
+      text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8);
+      font-weight: 800;
+      margin: 0;
+      white-space: nowrap;
+      color: rgb(255, 255, 255);
+    }
+
+    .trailer-wrapper {
+      flex-direction: row;
+      display: flex;
+      white-space: nowrap;
+      font-size: 3vw;
+      margin: 0;
+    }
+
+    .countdown {
+      font-size: 8vw;
+      white-space: nowrap;
+      text-shadow: 8px 8px 50px rgb(120, 120, 120);
+    }
+  
+    .all p, .all .affiliation p {
+      margin: 0;
+    }
+
+    /* Media Queries */
+    @media only screen and (max-width: 320px) {
+      .trailer-wrapper {
+        font-size: 20px;
+      }
+
+      .countdown {
+        font-size: 10vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 10px;
+      }
+    }
+
+    @media only screen and (min-width: 321px) and (max-width: 480px) {
+      .trailer-wrapper {
+        font-size: 25px;
+      }
+
+      .countdown {
+        font-size: 12vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 10px;
+      }
+    }
+
+    @media only screen and (min-width: 481px) and (max-width: 640px) {
+      .trailer-wrapper {
+        font-size: 30px;
+      }
+
+      .countdown {
+        font-size: 12vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 12px;
+      }
+    }
+
+    @media only screen and (min-width: 641px) and (max-width: 960px) {
+      .trailer-wrapper {
+        font-size: 35px;
+      }
+
+      .countdown {
+        font-size: 12vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 13px;
+      }
+    }
+
+    @media only screen and (min-width: 961px) and (max-width: 1024px) {
+      .trailer-wrapper {
+        font-size: 40px;
+      }
+
+      .countdown {
+        font-size: 12vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 15px;
+      }
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1280px) {
+      .trailer-wrapper {
+        font-size: 45px;
+      }
+
+      .countdown {
+        font-size: 10vw;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 17px;
+      }
+    }
+
+    @media only screen and (min-width: 1281px) {
+      .trailer-wrapper> div {
+        font-size: 50px;
+      }
+
+      .yourmom .countdown {
+        font-size: 40px;
+      }
+
+      .affiliation, .not, .aff {
+        font-size: 19px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="left" style="display: flex; flex:2">
+    <div class="all">
+      <div class="trailer-wrapper">
+          <div>GTA VI</div> <div style="margin-left: 20px; font-weight: 100;">TRAILER COUNTDOWN</div>
+      </div>
+
+      <div class="countdown" id="countdown"></div>
+
+      <div class="affiliation">
+        <p class="not">Not</p> <p  class="aff" style="margin-left: 3px;">affiliated with Rockstar Games</p>
+      </div>
+    </div>
+  </div>
+<div class="right" style="display: flex; flex:1"></div>
+
+  <script>
+    var countDownDate = new Date("Dec 5, 2023 13:59:40 UTC").getTime();
+
+    var x = setInterval(function() {
+      var now = new Date().getTime();
+      var distance = countDownDate - now;
+      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      var countdownString = "";
+      if (days > 0) {
+        countdownString += days + "d ";
+        countdownString += (hours < 10 ? "0" + hours : hours) + "h ";
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (hours > 0) {
+        countdownString += (hours < 10 ? "0" + hours : hours) + "h ";
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (minutes > 0) {
+        countdownString += (minutes < 10 ? "0" + minutes : minutes) + "m ";
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      } else if (seconds > 0) {
+        countdownString += (seconds < 10 ? "0" + seconds : seconds) + "s ";
+      }
+
+      document.getElementById("countdown").innerHTML = countdownString;
+
+      if (distance < 0) {
+        clearInterval(x);
+        document.getElementById("countdown").innerHTML = "🎆🚀🚀🎆";
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
