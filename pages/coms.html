@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Display Board App</title>
+    
+    <!-- Dynamic Manifest Link -->
+    <link rel="manifest" id="pwa-manifest" href="blob:https://4m85v5mknx6tpq4ac9k5pv1dg29frtfudobatvpy7h7hf1zxnv-h998661601.scf.usercontent.goog/7631692f-1cee-4cec-b6d6-1af8afff5ca8">
+
+    <style>
+        /* CSS resets and base styles */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0F172A; /* Deep Dark Blue */
+            color: #FFFFFF; /* High contrast white */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; /* Prevent native scrolling */
+            touch-action: none; /* Prevent browser zooming and panning */
+        }
+
+        /* The safe screen area that respects padding */
+        #screen {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            right: 5%;
+            bottom: 5%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The invisible text input area */
+        #text-input {
+            width: 100%;
+            max-height: 100%;
+            text-align: center;
+            outline: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            overflow: hidden;
+            caret-color: #38BDF8; /* Modern blue cursor */
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        /* Placeholder styling for empty state */
+        #text-input:empty::before {
+            content: "Type your message...";
+            color: rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            display: block;
+        }
+
+        /* Focus outline strictly disabled */
+        #text-input:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body style="height: 635px;">
+
+    <div id="screen">
+        <!-- contenteditable allows us to treat a div as a native input field while styling it freely -->
+        <div id="text-input" contenteditable="true" spellcheck="false" autocomplete="off" style="font-size: 520.447px;"><br></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const textInput = document.getElementById('text-input');
+            const screen = document.getElementById('screen');
+            let resizeTimeout;
+
+            // --- 1. DYNAMIC TEXT SCALING (Binary Search Algorithm) ---
+            function scaleText() {
+                // Set bounds for font size (in pixels)
+                let min = 12;
+                let max = Math.max(window.innerHeight, window.innerWidth);
+                let best = min;
+                
+                // Get target bounds based on our padded screen container
+                const targetWidth = screen.clientWidth;
+                const targetHeight = screen.clientHeight;
+
+                // Perform binary search for the perfect font size (~15 iterations max)
+                for (let i = 0; i < 15; i++) {
+                    let mid = (min + max) / 2;
+                    textInput.style.fontSize = mid + 'px';
+
+                    // Check if current size overflows the container
+                    if (textInput.scrollHeight <= targetHeight && textInput.scrollWidth <= targetWidth) {
+                        best = mid; // It fits, save it and try larger
+                        min = mid;
+                    } else {
+                        max = mid;  // It overflows, try smaller
+                    }
+                }
+                
+                // Apply the optimal size found
+                textInput.style.fontSize = best + 'px';
+            }
+
+            // --- 2. KEYBOARD & ORIENTATION HANDLING ---
+            function updateViewport() {
+                // Use visualViewport API to detect mobile keyboards accurately
+                const vv = window.visualViewport;
+                const height = vv ? vv.height : window.innerHeight;
+                
+                // Adjust body height dynamically. This pushes the bottom of the body 
+                // up so the #screen padding calculation avoids the keyboard space.
+                document.body.style.height = height + 'px';
+                
+                // Keep the input scrolled to top to prevent weird jumping
+                window.scrollTo(0, 0); 
+                
+                // Recalculate font size based on new boundaries
+                scaleText();
+            }
+
+            // Listeners for resizing, orientation changes, and keyboard appearance
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', updateViewport);
+            }
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateViewport, 50);
+            });
+            window.addEventListener('orientationchange', updateViewport);
+
+            // Re-scale immediately when text changes
+            textInput.addEventListener('input', scaleText);
+            
+            // Clean up pasted text to prevent copying HTML/styles into our display
+            textInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+                scaleText();
+            });
+
+            // --- 3. DOUBLE-TAP TO CLEAR (Only when focused) ---
+            let lastTapTime = 0;
+            
+            function handleClearAttempt(e) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                
+                // Check if it's a double tap (under 300ms)
+                if (tapLength < 300 && tapLength > 0) {
+                    // Crucial: Only clear if the user is actively typing (input has focus)
+                    if (document.activeElement === textInput) {
+                        textInput.innerHTML = ''; // Clear text safely
+                        scaleText();
+                        e.preventDefault(); // Prevent standard browser double-tap zoom
+                    }
+                }
+                lastTapTime = currentTime;
+            }
+
+            // Mobile touch implementation
+            textInput.addEventListener('touchstart', handleClearAttempt, { passive: false });
+            // Desktop fallback implementation
+            textInput.addEventListener('dblclick', handleClearAttempt);
+
+            // --- 4. INPUT UX (Invisible Field & Focus) ---
+            // If the user clicks anywhere in the dark background, focus the text input
+            document.body.addEventListener('click', (e) => {
+                if (e.target !== textInput) {
+                    textInput.focus();
+                    
+                    // Move caret to the end of the text if content exists
+                    if (textInput.childNodes.length > 0) {
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        range.setStartAfter(textInput.lastChild);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            });
+
+            // Initialize layout
+            updateViewport();
+            textInput.focus();
+        });
+
+        // --- 5. PROGRESSIVE WEB APP (PWA) SETUP ---
+        // Dynamically generating PWA assets to comply with the single-file requirement.
+        
+        // 5a. Generate Manifest dynamically
+        const manifest = {
+            "name": "Deaf Comm Display",
+            "short_name": "CommApp",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#0F172A",
+            "theme_color": "#0F172A",
+            "description": "A highly visible communication board",
+            "icons": [{
+                // Using an embedded SVG data URI as an icon for complete independence
+                "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230F172A'/><text y='55%' x='50%' dominant-baseline='middle' text-anchor='middle' font-size='50' font-family='sans-serif' fill='white'>Aa</text></svg>",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+        // 5b. Generate and Register Service Worker dynamically for Offline Support
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'commapp-offline-v1';
+                
+                // On install, skip waiting to ensure immediate updates
+                self.addEventListener('install', event => {
+                    self.skipWaiting();
+                });
+                
+                self.addEventListener('activate', event => {
+                    event.waitUntil(clients.claim());
+                });
+
+                // Intercept fetches. Since it's a single file, we just return the offline ready state.
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        fetch(event.request).catch(() => {
+                            return new Response('App is running in offline mode.');
+                        })
+                    );
+                });
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob))
+                .then(registration => console.log('PWA Service Worker registered for offline use.'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+    </script>
+
+</body></html>
