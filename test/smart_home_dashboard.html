@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Home · Dashboard</title>
+<style>
+:root{
+  --bg:#0b1118; --panel:#131d28; --panel2:#182533; --line:#263646;
+  --text:#edf4fa; --muted:#91a3b5; --accent:#8bd3c7; --accent2:#a9c8ff;
+  --warn:#f2c879; --danger:#ee8d8d; --radius:18px;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% 0%,#182b39 0%,transparent 38%),var(--bg);color:var(--text);min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:1440px;margin:auto;padding:22px 24px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.brandmark{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#a4e4d7,#5b9f9b);display:grid;place-items:center;color:#10221f;font-size:23px;font-weight:800}
+.brand h1{font-size:19px;letter-spacing:.2px;margin:0}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.top-right{display:flex;align-items:center;gap:18px}
+.clock{text-align:right}
+.clock strong{font-size:27px;letter-spacing:.5px;font-variant-numeric:tabular-nums}
+.clock span{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.status-pill{border:1px solid var(--line);background:#14222d;border-radius:999px;padding:9px 13px;color:#b8d9d2;font-size:12px;white-space:nowrap}
+.nav{display:flex;gap:8px;padding:7px;background:#101923;border:1px solid var(--line);border-radius:16px;margin-bottom:18px;overflow-x:auto}
+.nav button{border:0;background:transparent;color:var(--muted);padding:11px 17px;border-radius:11px;font-weight:650;font-size:13px;white-space:nowrap}
+.nav button.active{background:#263b49;color:var(--text);box-shadow:inset 0 0 0 1px #395464}
+.nav button .ico{margin-right:7px}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.card{background:linear-gradient(155deg,rgba(24,37,51,.98),rgba(17,27,38,.98));border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-width:0;box-shadow:0 8px 24px #00000012}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.card h2{font-size:14px;margin:0;font-weight:700;letter-spacing:.15px}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.weather{grid-column:span 5;min-height:176px}
+.weather-main{display:flex;align-items:center;gap:15px}
+.weather-icon{font-size:42px;line-height:1}
+.temp{font-size:36px;font-weight:750;letter-spacing:-1.5px}
+.weather-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.weather-stats{display:flex;gap:18px;margin-top:16px;flex-wrap:wrap}
+.stat small{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}
+.stat b{font-size:12px}
+.forecast{display:flex;gap:8px;margin-top:15px}
+.forecast div{flex:1;background:#101a24;border-radius:10px;padding:8px 5px;text-align:center;min-width:0}
+.forecast small{display:block;color:var(--muted);font-size:10px}
+.forecast b{display:block;font-size:12px;margin-top:4px}
+.lights{grid-column:span 4}
+.light-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.light-btn{background:#101a24;border:1px solid var(--line);border-radius:12px;padding:11px 5px;text-align:center;min-width:0}
+.light-btn .bulb{font-size:19px;display:block;margin-bottom:5px}
+.light-btn span{font-size:10px;color:var(--muted);display:block}
+.light-btn.on{border-color:#b6a56e;background:#29291f}
+.light-btn.on .bulb{color:#f5d98c}
+.actions{display:flex;gap:7px;margin-top:10px}
+.small-btn,.action-btn{border:1px solid var(--line);background:#223342;border-radius:10px;padding:9px 11px;font-size:11px;font-weight:650}
+.small-btn{flex:1}
+.small-btn.danger{color:#f0aaaa}
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.preset{border:1px solid #354758;background:#1b2b38;border-radius:999px;padding:7px 10px;font-size:10px;color:#c7d7e4}
+.climate{grid-column:span 3}
+.mode-switch{display:flex;background:#101a24;padding:3px;border-radius:9px;gap:3px}
+.mode-switch button{border:0;background:transparent;color:var(--muted);font-size:10px;padding:6px 8px;border-radius:7px}
+.mode-switch button.active{background:#334a58;color:white}
+.climate-body{text-align:center;padding:5px 0}
+.climate-label{color:var(--muted);font-size:11px}
+.climate-value{font-size:36px;font-weight:750;margin:5px 0;font-variant-numeric:tabular-nums}
+.stepper{display:flex;align-items:center;justify-content:center;gap:18px}
+.stepper button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#223442;font-size:20px}
+.climate-foot{font-size:10px;color:var(--muted);margin-top:10px}
+.energy{grid-column:span 7}
+.energy-total{display:flex;align-items:center;justify-content:space-between;background:#101a24;border-radius:13px;padding:12px 14px;margin-bottom:11px}
+.energy-total small{color:var(--muted);display:block;font-size:10px}
+.energy-total strong{font-size:22px;font-variant-numeric:tabular-nums}
+.flow-tag{font-size:10px;padding:6px 9px;border-radius:999px;background:#18372f;color:#a9e2cf}
+.energy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.energy-item{background:#101a24;border-radius:12px;padding:11px 10px;min-width:0}
+.energy-item .symbol{font-size:17px}
+.energy-item small{display:block;color:var(--muted);font-size:10px;margin:5px 0 3px}
+.energy-item b{font-size:14px;white-space:nowrap}
+.energy-item em{display:block;font-style:normal;color:var(--muted);font-size:9px;margin-top:3px}
+.energy-bar{height:5px;background:#293947;border-radius:9px;margin-top:9px;overflow:hidden}
+.energy-bar i{display:block;height:100%;width:64%;background:var(--accent);border-radius:9px}
+.trains{grid-column:span 5}
+.train-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.train{background:#101a24;border-radius:13px;padding:12px}
+.train .direction{font-size:10px;color:var(--muted)}
+.train .destination{font-weight:700;font-size:13px;margin:5px 0}
+.train .departure{font-size:22px;font-weight:750;font-variant-numeric:tabular-nums}
+.train .in{font-size:10px;color:var(--accent);margin-top:3px}
+.robot{grid-column:span 3}
+.robot-art{height:58px;border-radius:12px;background:linear-gradient(135deg,#263c49,#172631);display:grid;place-items:center;font-size:32px;margin-bottom:10px}
+.robot-state{font-size:11px;color:var(--accent);margin-bottom:10px}
+.robot .actions button{flex:1}
+.notifications{grid-column:span 6}
+.notification{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #263542}
+.notification:last-child{border:0;padding-bottom:0}
+.n-icon{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#3a3020;color:var(--warn);flex:none}
+.notification b{font-size:11px;display:block;margin-bottom:3px}
+.notification p{font-size:10px;color:var(--muted);margin:0;line-height:1.4}
+.label{grid-column:span 3}
+.text-input{width:100%;background:#101a24;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);outline:none;font:inherit;font-size:12px}
+.label .action-btn{width:100%;margin-top:8px;background:#29443f;border-color:#426b61}
+.timers{grid-column:span 3}
+.timer-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.timer-buttons button{background:#101a24;border:1px solid var(--line);border-radius:11px;padding:12px 4px;font-size:14px;font-weight:750}
+.timer-buttons small{display:block;font-size:9px;color:var(--muted);font-weight:500;margin-top:3px}
+.timer-status{font-size:10px;color:var(--muted);margin-top:9px;min-height:14px}
+.door{grid-column:span 3}
+.door button{width:100%;height:86px;border:1px solid #426b61;background:linear-gradient(135deg,#294b46,#1d3435);border-radius:13px;font-weight:700;font-size:13px}
+.door button span{display:block;font-size:23px;margin-bottom:6px}
+.subpage-intro{grid-column:span 12;padding:22px}
+.subpage-intro h2{font-size:22px;margin:7px 0}
+.subpage-intro p{color:var(--muted);font-size:13px;margin:0;max-width:650px;line-height:1.6}
+.placeholder{grid-column:span 4;min-height:150px}
+.placeholder .big-icon{font-size:28px;margin-bottom:12px}
+.placeholder p{color:var(--muted);font-size:12px;line-height:1.5}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.room{background:#101a24;border:1px solid var(--line);border-radius:13px;padding:14px}
+.room b{display:block;font-size:12px;margin:7px 0}
+.room small{color:var(--muted);font-size:10px}
+.device-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:12px}
+.device-row:last-child{border:0}
+.toggle{width:39px;height:22px;border:0;border-radius:99px;background:#42505c;padding:3px}
+.toggle:after{content:"";display:block;width:16px;height:16px;background:#eaf1f5;border-radius:50%;transition:.2s}
+.toggle.on{background:#5eaa98}
+.toggle.on:after{transform:translateX(17px)}
+.footer-note{text-align:center;color:#718496;font-size:10px;padding:18px 0 0}
+@media(max-width:900px){
+ .app{padding:14px}.weather{grid-column:span 6}.lights{grid-column:span 6}.climate{grid-column:span 6}
+ .energy{grid-column:span 7}.trains{grid-column:span 5}.robot{grid-column:span 5}
+ .notifications{grid-column:span 7}.label,.timers,.door{grid-column:span 4}
+}
+@media(max-width:650px){
+ .app{padding:10px}.topbar{align-items:flex-start}.status-pill{display:none}
+ .grid{gap:10px}.weather,.lights,.climate,.energy,.trains,.robot,.notifications,.label,.timers,.door,.placeholder{grid-column:span 12}
+ .energy-grid{grid-template-columns:repeat(2,1fr)}
+ .weather-stats{gap:12px}.clock strong{font-size:22px}
+ .room-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark">⌂</div>
+      <div><h1>Home Dashboard</h1><p>Smart Home · Zentrale Übersicht</p></div>
+    </div>
+    <div class="top-right">
+      <div class="status-pill">● Alle Systeme verbunden</div>
+      <div class="clock"><strong id="clock">17:44</strong><span id="date">Sonntag, 1. November 2026</span></div>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Hauptnavigation">
+    <button class="active" data-page="home"><span class="ico">⌂</span>Übersicht</button>
+    <button data-page="lights"><span class="ico">☼</span>Licht</button>
+    <button data-page="garden"><span class="ico">♧</span>Garten / Outdoor</button>
+    <button data-page="media"><span class="ico">▣</span>Media</button>
+    <button data-page="charging"><span class="ico">ϟ</span>Charging</button>
+  </nav>
+
+  <main>
+    <section class="page active" id="page-home">
+      <div class="grid">
+        <article class="card weather">
+          <div class="card-head"><h2>Wetter · Bensheim</h2><span class="eyebrow">Heute</span></div>
+          <div class="weather-main">
+            <div class="weather-icon">🌤️</div>
+            <div><div class="temp">16°</div><div class="weather-desc">Heiter bis wolkig · Gefühlt 15°</div></div>
+          </div>
+          <div class="weather-stats">
+            <div class="stat"><small>Höchst / Tiefst</small><b>18° / 9°</b></div>
+            <div class="stat"><small>Regen</small><b>10 %</b></div>
+            <div class="stat"><small>Wind</small><b>12 km/h ↗</b></div>
+            <div class="stat"><small>Luftfeuchte</small><b>62 %</b></div>
+          </div>
+          <div class="forecast">
+            <div><small>18:00</small><b>🌤️ 15°</b></div><div><small>19:00</small><b>☁️ 13°</b></div>
+            <div><small>20:00</small><b>☁️ 12°</b></div><div><small>21:00</small><b>🌙 11°</b></div>
+            <div><small>22:00</small><b>🌙 10°</b></div>
+          </div>
+        </article>
+
+        <article class="card lights">
+          <div class="card-head"><h2>Beleuchtung · Schnellzugriff</h2><span class="eyebrow">3 Deckenlichter</span></div>
+          <div class="light-list">
+            <button class="light-btn on" onclick="this.classList.toggle('on')"><span class="bulb">☼</span><span>Decke Wohnen</span></button>
+            <button class="light-btn" onclick="this.classList.toggle('on')"><span class="bulb">☼</span><span>Decke Küche</span></button>
+            <button class="light-btn on" onclick="this.classList.toggle('on')"><span class="bulb">☼</span><span>Decke Flur</span></button>
+          </div>
+          <div class="actions"><button class="small-btn danger" onclick="allLights(false)">Alle aus</button><button class="small-btn" onclick="setTimeout(()=>allLights(false),2000)">Alle aus · 2 Min.</button></div>
+          <div class="presets"><button class="preset">☀ Alltag</button><button class="preset">◉ Entspannen</button><button class="preset">▰ Filmabend</button><button class="preset">☾ Nacht</button></div>
+        </article>
+
+        <article class="card climate">
+          <div class="card-head"><h2>Raumklima</h2><div class="mode-switch"><button class="active" id="heatMode" onclick="setMode('heat')">Heizung</button><button id="coolMode" onclick="setMode('cool')">Klima</button></div></div>
+          <div class="climate-body">
+            <div class="climate-label" id="climateLabel">Zieltemperatur · beide Heizungen</div>
+            <div class="climate-value"><span id="climateTemp">21.0</span>°</div>
+            <div class="stepper"><button onclick="adjustTemp(-0.5)">−</button><span class="muted" style="font-size:10px">Einstellen</span><button onclick="adjustTemp(0.5)">+</button></div>
+            <div class="climate-foot" id="climateFoot">Wohnbereich + Badezimmer · Beispielwerte</div>
+          </div>
+        </article>
+
+        <article class="card energy">
+          <div class="card-head"><h2>Energiemanagement</h2><span class="eyebrow">Live-Übersicht · Beispielwerte</span></div>
+          <div class="energy-total"><div><small>Netzleistung · Bezug / Einspeisung</small><strong>− 1,24 kW</strong></div><span class="flow-tag">↑ Einspeisung</span></div>
+          <div class="energy-grid">
+            <div class="energy-item"><span class="symbol">☀️</span><small>Große PV</small><b>3,80 kW</b><em>Produktion</em></div>
+            <div class="energy-item"><span class="symbol">🌤️</span><small>Kleine PV</small><b>0,62 kW</b><em>Produktion</em></div>
+            <div class="energy-item"><span class="symbol">🔋</span><small>Hausakku</small><b>78 %</b><em>− 0,45 kW · Entladen</em><div class="energy-bar"><i style="width:78%"></i></div></div>
+            <div class="energy-item"><span class="symbol">⌂</span><small>Hausverbrauch</small><b>2,73 kW</b><em>Aktuelle Leistung</em></div>
+          </div>
+        </article>
+
+        <article class="card trains">
+          <div class="card-head"><h2>Nächste Zugverbindungen</h2><span class="eyebrow">Bahnhof Beispiel</span></div>
+          <div class="train-grid">
+            <div class="train"><div class="direction">Richtung Norden</div><div class="destination">Darmstadt Hbf</div><div class="departure">18:02</div><div class="in">in 8 Minuten · Gleis 2</div></div>
+            <div class="train"><div class="direction">Richtung Süden</div><div class="destination">Heidelberg Hbf</div><div class="departure">18:11</div><div class="in">in 17 Minuten · Gleis 1</div></div>
+          </div>
+        </article>
+
+        <article class="card robot">
+          <div class="card-head"><h2>Saugroboter</h2><span class="eyebrow">Roborock S8</span></div>
+          <div class="robot-art">🤖</div><div class="robot-state">● Bereit · Akku 84 %</div>
+          <div class="actions"><button class="small-btn" onclick="alert('Demo: Reinigung gestartet')">▶ Start</button><button class="small-btn" onclick="alert('Demo: fährt zur Station')">⌂ Home</button></div>
+        </article>
+
+        <article class="card notifications">
+          <div class="card-head"><h2>Benachrichtigungen</h2><span class="eyebrow">2 Meldungen</span></div>
+          <div class="notification"><div class="n-icon">!</div><div><b>Handy-Akku niedrig · 2 %</b><p>Bitte das Smartphone laden.</p></div></div>
+          <div class="notification"><div class="n-icon">▦</div><div><b>Kalender · 19:30 Uhr</b><p>Erinnerung: Termin vorbereiten.</p></div></div>
+          <div class="notification"><div class="n-icon">ϟ</div><div><b>Powerbank nicht geladen</b><p>Gerät wartet auf den nächsten Ladevorgang.</p></div></div>
+        </article>
+
+        <article class="card label">
+          <div class="card-head"><h2>Labeldrucker</h2><span class="eyebrow">Brother · Demo</span></div>
+          <input class="text-input" id="labelText" placeholder="Text für das Label …" value="Übermorgen">
+          <button class="action-btn" onclick="alert('Demo: Label wird gedruckt – '+document.getElementById('labelText').value)">▤ Label drucken</button>
+        </article>
+
+        <article class="card timers">
+          <div class="card-head"><h2>Schnell-Timer</h2><span class="eyebrow">Ein Tastendruck</span></div>
+          <div class="timer-buttons"><button onclick="startTimer(5)">5<small>Min.</small></button><button onclick="startTimer(10)">10<small>Min.</small></button><button onclick="startTimer(15)">15<small>Min.</small></button></div>
+          <div class="timer-status" id="timerStatus">Noch kein Timer aktiv</div>
+        </article>
+
+        <article class="card door">
+          <div class="card-head"><h2>Haustür</h2><span class="eyebrow">Zugang</span></div>
+          <button onclick="alert('Demo: Türöffner ausgelöst')"><span>⌑</span>Haustür öffnen</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-lights">
+      <div class="grid">
+        <article class="card subpage-intro"><div class="eyebrow">Bereich 02</div><h2>Lichtsteuerung</h2><p>Alle Leuchten, Lichtgruppen, Farben, Helligkeiten und Szenen an einem Ort. Die folgenden Elemente sind Platzhalter für deine tatsächlichen Geräte.</p></article>
+        <article class="card" style="grid-column:span 8">
+          <div class="card-head"><h2>Räume & Lichtgruppen</h2><span class="eyebrow">Beispielgeräte</span></div>
+          <div class="room-grid">
+            <div class="room">💡<b>Wohnzimmer</b><small>Decke · Stehlampe · Ambient</small><div class="device-row">Deckenlicht <button class="toggle on" onclick="this.classList.toggle('on')"></button></div><div class="device-row">Stehlampe <button class="toggle" onclick="this.classList.toggle('on')"></button></div></div>
+            <div class="room">🍽️<b>Küche</b><small>Decke · Arbeitsfläche</small><div class="device-row">Deckenlicht <button class="toggle on" onclick="this.classList.toggle('on')"></button></div><div class="device-row">Arbeitsfläche <button class="toggle" onclick="this.classList.toggle('on')"></button></div></div>
+            <div class="room">🚪<b>Flur</b><small>Decke · indirektes Licht</small><div class="device-row">Deckenlicht <button class="toggle on" onclick="this.classList.toggle('on')"></button></div><div class="device-row">Indirekt <button class="toggle" onclick="this.classList.toggle('on')"></button></div></div>
+          </div>
+        </article>
+        <article class="card" style="grid-column:span 4"><div class="card-head"><h2>Aktive Leuchte</h2></div><p class="muted" style="font-size:11px">Helligkeit</p><input type="range" min="1" max="100" value="72" style="width:100%;accent-color:#8bd3c7"><p class="muted" style="font-size:11px;margin-top:20px">Farbtemperatur</p><input type="range" min="1" max="100" value="55" style="width:100%;accent-color:#8bd3c7"><p class="muted" style="font-size:11px;margin-top:20px">Lichtfarbe</p><input type="color" value="#f5d58c" style="width:100%;height:38px;border:0;background:transparent"></article>
+        <article class="card" style="grid-column:span 12"><div class="card-head"><h2>Lichtszenen</h2></div><div class="presets"><button class="preset">☀ Alltag</button><button class="preset">◉ Entspannen</button><button class="preset">▰ Filmabend</button><button class="preset">☾ Nacht</button><button class="preset">🎨 Kreativ</button><button class="preset">✨ Alles hell</button></div></article>
+      </div>
+    </section>
+
+    <section class="page" id="page-garden">
+      <div class="grid">
+        <article class="card subpage-intro"><div class="eyebrow">Bereich 03</div><h2>Garten / Outdoor</h2><p>Zentrale Steuerung für Garten, Terrasse und Außenbeleuchtung. Geräte und Funktionen sind beispielhaft angelegt und können später konkretisiert werden.</p></article>
+        <article class="card placeholder"><div class="big-icon">💧</div><h2>Bewässerung</h2><p>Gartenbewässerung · Status, Zeitplan und manuelles Starten.</p><button class="small-btn">Bewässerung starten</button></article>
+        <article class="card placeholder"><div class="big-icon">🌿</div><h2>Gartenbeleuchtung</h2><p>Terrasse, Wege und Beete · Schalten und Szenen.</p><button class="small-btn">Außenlicht schalten</button></article>
+        <article class="card placeholder"><div class="big-icon">🌡️</div><h2>Außensensoren</h2><p>Temperatur, Helligkeit und weitere Messwerte im Außenbereich.</p></article>
+      </div>
+    </section>
+
+    <section class="page" id="page-media">
+      <div class="grid">
+        <article class="card subpage-intro"><div class="eyebrow">Bereich 04</div><h2>Media</h2><p>Mediengeräte und Wiedergabe zentral bedienen. Die Karten sind Platzhalter für die später eingebundenen Geräte.</p></article>
+        <article class="card placeholder"><div class="big-icon">📺</div><h2>Wohnzimmer-TV</h2><p>Ein-/Ausschalten, Quelle, Lautstärke und Wiedergabestatus.</p><button class="small-btn">TV einschalten</button></article>
+        <article class="card placeholder"><div class="big-icon">🔊</div><h2>Lautsprecher</h2><p>Musik, Lautstärke, Raumgruppe und Wiedergabe.</p><button class="small-btn">Wiedergabe</button></article>
+        <article class="card placeholder"><div class="big-icon">🎬</div><h2>Media-Szenen</h2><p>Filmabend, Musik und weitere Medien-Presets.</p><button class="small-btn">Filmabend</button></article>
+      </div>
+    </section>
+
+    <section class="page" id="page-charging">
+      <div class="grid">
+        <article class="card subpage-intro"><div class="eyebrow">Bereich 05</div><h2>Charging</h2><p>Akkuübersicht und zentrale Ladeverwaltung. Hier werden niedrige Ladestände, aktive Ladevorgänge und Automatisierungen zusammengeführt.</p></article>
+        <article class="card" style="grid-column:span 7"><div class="card-head"><h2>Geräte & Akkustand</h2><span class="eyebrow">Beispielwerte</span></div>
+          <div class="device-row"><span>📱 Smartphone · 2 %</span><span style="color:#ee8d8d">Kritisch</span></div>
+          <div class="device-row"><span>⌚ Smartwatch · 64 %</span><span style="color:#a9e2cf">Ausreichend</span></div>
+          <div class="device-row"><span>🎧 Kopfhörer · 18 %</span><span style="color:#f2c879">Bald laden</span></div>
+          <div class="device-row"><span>🔋 Powerbank · 41 %</span><span class="muted">Nicht verbunden</span></div>
+        </article>
+        <article class="card" style="grid-column:span 5"><div class="card-head"><h2>Ladeautomationen</h2></div>
+          <div class="device-row">Smartphone automatisch laden <button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="device-row">Kopfhörer bei niedrigem Akku <button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="device-row">Powerbank nach Zeitplan <button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <div class="footer-note">Design-Prototyp · Platzhalterdaten · Keine echte Smart-Home-Anbindung</div>
+</div>
+<script>
+const navButtons=[...document.querySelectorAll('.nav button')];
+navButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  navButtons.forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+btn.dataset.page).classList.add('active');
+}));
+function allLights(on){document.querySelectorAll('.light-btn').forEach(b=>b.classList.toggle('on',on));}
+let mode='heat',temp=21;
+function setMode(next){mode=next;document.getElementById('heatMode').classList.toggle('active',mode==='heat');document.getElementById('coolMode').classList.toggle('active',mode==='cool');document.getElementById('climateLabel').textContent=mode==='heat'?'Zieltemperatur · beide Heizungen':'Zieltemperatur · Klimaanlage';document.getElementById('climateFoot').textContent=mode==='heat'?'Wohnbereich + Badezimmer · Beispielwerte':'Wohnbereich · Beispielwert';temp=mode==='heat'?21:23;document.getElementById('climateTemp').textContent=temp.toFixed(1);}
+function adjustTemp(delta){temp=Math.max(16,Math.min(30,temp+delta));document.getElementById('climateTemp').textContent=temp.toFixed(1);}
+function startTimer(min){const status=document.getElementById('timerStatus');status.textContent='Demo-Timer gestartet: '+min+' Minuten';}
+function updateClock(){const now=new Date();document.getElementById('clock').textContent=now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});document.getElementById('date').textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+updateClock();setInterval(updateClock,10000);
+</script>
+</body>
+</html>
